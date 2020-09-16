@@ -6,7 +6,7 @@
 
 APACHE_DIR="/var/www/html"
 GLPI_DIR="${APACHE_DIR}/glpi"
-GLPI_SOURCE_URL=${GLPI_SOURCE_URL:-"https://github.com/glpi-project/glpi/releases/download/9.4.6/glpi-9.4.6.tgz"}
+GLPI_SOURCE_URL=${GLPI_SOURCE_URL:-"https://github.com/glpi-project/glpi/releases/download/9.5.1/glpi-9.5.1.tgz"}
 ## INSTALL GLPI IF NOT INSTALLED ALREADY ######################################
 
 if [ "$(ls -A $GLPI_DIR)" ]; then
@@ -30,13 +30,16 @@ sed -i -- 's/DocumentRoot .*/DocumentRoot \/var\/www\/html\/glpi/g' $VHOST
 # Remove ServerSignature (secutiry)
 sed -i -- '/ServerSignature /d' $VHOST
 awk '/<\/VirtualHost>/{print "ServerSignature Off" RS $0;next}1' $VHOST > tmp && mv tmp $VHOST
-# Eenable .htaccess
+# Enable .htaccess
 sed -i -- '/<Directory /d' $VHOST
 awk '/<\/VirtualHost>/{print "<Directory \"/var/www/html/glpi\">" RS $0;next}1' $VHOST > tmp && mv tmp $VHOST
 sed -i -- '/AllowOverride All/d' $VHOST
 awk '/<\/VirtualHost>/{print "AllowOverride All" RS $0;next}1' $VHOST > tmp && mv tmp $VHOST
 sed -i -- '/<\/Directory/d' $VHOST
 awk '/<\/VirtualHost>/{print "</Directory>" RS $0;next}1' $VHOST > tmp && mv tmp $VHOST
+
+#Permit upload 100M instead of 2M
+sed -i 's/2M/100M/g' /etc/php/7.2/apache2/php.ini
 
 # HTACCESS="/var/www/html/.htaccess"
 # /bin/cat <<EOM >$HTACCESS
